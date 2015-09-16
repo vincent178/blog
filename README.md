@@ -1,5 +1,4 @@
 # Vincent's BLOGs
-
 ---
 
 #### [16-09-2015 scala learning note](https://github.com/vincent178/blog/issues/3)
