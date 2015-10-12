@@ -108,7 +108,7 @@ author:
     # Your profile picture located in folder `source/_images/` (development)
     # or in `source/assets/images/` (production).
     # Overwritten by your gravatar image if `gravatar_image` is enabled
-    picture:
+    picture: avatar.jpg
     # Your Twitter username without the @. E.g : `tranquilpeak`
     twitter: vincent_178
     # Your google plus profile id. E.g : `+Tranquilpeak` or `123812884128439`
