@@ -1,7 +1,7 @@
 title: 有用的Linux命令
 date: 2015-10-13 06:23:28
 tags:
-coverImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444696477/linux-logo_xntobe.png
+coverImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444696810/Cool-Linux-Tux-Wallpaper_mbunwg.png
 thumbnailImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444696566/littletux_bumper.sh-600x600_ywmelk.png
 ---
 
