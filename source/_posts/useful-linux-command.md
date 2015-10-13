@@ -1,8 +1,8 @@
 title: 有用的Linux命令
 date: 2015-10-13 06:23:28
 tags:
-coverImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444614345/ubuntu-blue-1440x900_vgwx3r.jpg
-thumbnailImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444614834/apple-touch-icon-144x144-precomposed_bbmwvw.png
+coverImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444696477/linux-logo_xntobe.png
+thumbnailImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444696566/littletux_bumper.sh-600x600_ywmelk.png
 ---
 
 
