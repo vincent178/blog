@@ -1,7 +1,6 @@
 title: Ubuntu setup for Ruby on Rails gems
 date: 2015-10-12 09:39:47
 tags: Ruby
-coverImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444614345/ubuntu-blue-1440x900_vgwx3r.jpg
 thumbnailImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444614834/apple-touch-icon-144x144-precomposed_bbmwvw.png
 ---
 
