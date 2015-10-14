@@ -1,6 +1,7 @@
 title: 好用的 git 命令
 date: 2015-10-14 11:20:06
 tags:
+thumbnailImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444809200/git_logo_sumtl9.png
 ---
 
 1. Create Branch
