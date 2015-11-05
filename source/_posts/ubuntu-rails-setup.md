@@ -1,6 +1,7 @@
 title: Ubuntu Nginx Passenger MySQL imagemagick Setup
 date: 2015-10-19 06:07:36
 tags:
+thumbnailImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1444614834/apple-touch-icon-144x144-precomposed_bbmwvw.png
 ---
 
 

@@ -1,6 +1,7 @@
 title: How to run localhost rails on https
 date: 2015-10-18 20:52:15
 tags:
+thumbnailImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1446689520/ruby-on-rails-logo_v7olyf.jpg
 ---
 
 ### First Step

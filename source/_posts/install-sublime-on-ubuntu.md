@@ -1,6 +1,7 @@
 title: Install Sublime on Ubuntu
 date: 2015-10-26 16:43:07
 tags:
+thumbnailImage: http://res.cloudinary.com/dudqzxsbb/image/upload/v1446689302/Sublime_Text_Logo_h2xkkm.png
 ---
 
 For Sublime-Text-2
