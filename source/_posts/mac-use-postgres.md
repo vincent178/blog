@@ -9,6 +9,12 @@ tags:
 初始化数据库
 `$ initdb /usr/local/var/postgres`
 
+启动并开机自启动数据库
+```
+$ ln -sfv /usr/local/opt/memcached/*.plist ~/Library/LaunchAgents
+$ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.memcached.plist
+```
+
 可选: 下载 postgres GUI client
 这里推荐一个: [postico](https://eggerapps.at/postico/) 可以无限试用, 界面很好看
 
