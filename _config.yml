@@ -11,6 +11,7 @@ author: Vincent
 language:
 timezone:
 
+disqus_shortname: blog-invxqhc0m5
 
 github: https://github.com/vincent178  
 twitter: https://twitter.com/vincent_178
@@ -42,7 +43,7 @@ titlecase: false # Transform title into titlecase
 external_link: true # Open external links in new tab
 filename_case: 0
 render_drafts: false
-post_asset_folder: true
+post_asset_folder: false
 relative_link: false
 future: true
 highlight:
