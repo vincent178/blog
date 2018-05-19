@@ -21,8 +21,8 @@ weibo:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
-root: /
+url: http://vincent178.github.io/
+root: /blog/
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 
@@ -87,5 +87,5 @@ theme: cais
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  host: https://github.com/vincent178/blog/
-  branch: deploy
+  repo: https://github.com/vincent178/blog/
+  branch: gh-pages
