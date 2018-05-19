@@ -86,7 +86,6 @@ theme: cais
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type: rsync
-  host: 139.196.182.86
-  user: deploy
-  root: site
+  type: git
+  host: https://github.com/vincent178/blog/
+  branch: deploy
