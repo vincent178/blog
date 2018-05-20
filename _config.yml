@@ -3,10 +3,10 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: hdd 开发小站
-subtitle: 专注 web 开发
-description:
-keywords:
+title: 学无止境
+subtitle: Vincent 专注 web 开发
+description: 专注 web 技术
+keywords: web javascript react
 author: Vincent
 language:
 timezone:
@@ -21,8 +21,8 @@ weibo:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://vincent178.github.io/blog
-root: /blog/
+url: http://blog.vincent178.top
+root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 
@@ -87,5 +87,4 @@ theme: cais
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: https://github.com/vincent178/blog/
-  branch: gh-pages
+  repo: https://github.com/vincent178/vincent178.github.io
