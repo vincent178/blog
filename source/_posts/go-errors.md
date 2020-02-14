@@ -10,6 +10,9 @@ errors.As 类似于类型推断，但是会检查整个链上的错误
 
 1.13 之前只有 string
 
-1.13 之后可以包含 error
+1.13 之后可以包含(wrap) error
 
 
+
+### Reference
+1. https://blog.golang.org/go1.13-errors
