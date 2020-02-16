@@ -4,6 +4,7 @@ Go errors
 > Go 一直把错误作为一个普通的值，一个包含一段文本信息的类型为错误的值，而这在 1.13 版本之后发生了改变。
 
 ## 在 1.13 之前
+
 Go 中任意类型只要实现了 `error` 接口的都可以称为错误。
 ```go
 type error interface {
@@ -100,6 +101,7 @@ if errors.Is(err, &Error{User: "someuser"}) {
 
 
 ## 源码解析
+基于 go version go1.13.1 darwin/amd64 的源代码解析
 
 ```go
 func Unwrap(err error) error {
