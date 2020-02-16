@@ -11,9 +11,6 @@ Context 接口
 timeout
 
 
-
-
-
 ```go
 type Context interface {
 	Deadline() (deadline time.Time, ok bool)
