@@ -1,4 +1,4 @@
-Go errors
+Go error
 ========
 
 > Go 一直把错误作为一个普通的值，一个包含一段文本信息的类型为错误的值，而这在 1.13 版本之后发生了改变。
@@ -15,6 +15,7 @@ type error interface {
 程序中通常会直接用 `errors.New` 生成错误，调用者拿到错误的时候可以直接用 `==` 做错误判断：
 ```go
 var ErrNotFound = errors.New("not found")
+
 if err == ErrNotFound {
 	// 错误处理
 }
@@ -33,19 +34,20 @@ if e, ok := err.(*NotFoundError); ok {
 }
 ```
 
-当要传递额外信息的错误时，通常是用 `fmt.Errorf` 来包含原来的错误：
+当错误要传递额外信息时，通常是用 `fmt.Errorf` 来包含原来的错误：
 ```go
 if err != nil {
 	return fmt.Errorf("登陆失败: %v", err)
 }
 ```
-但上述方法只能包含原有错误中的文本信息 (message)，失去了原有错误的其他信息，包括类型以及其他自定义的信息。调用者也失去了处理原有错误的机会，只能基于文本做分析处理。
+但上述方法只能包含原有错误中的文本信息 (message)，失去了原有错误的其他信息，包括类型以及`struct` 其他自定义的字段。调用者也失去了处理原有错误的机会，只能基于文本做分析处理。
 
 ## 新的 API
 
 问题出在了 `fmt.Errorf` 返回的时候失去了内部错误的信息，保留的文本信息在简单的 debug 场景下是够用了，到复杂系统中，这样的信息是远远不够的。
 
-Go 在 1.13 版本中带来了 error wrapping，简单的说就是在错误传递的过程中，新生成的错误中可以包含完整的老的错误，就像洋葱一样的层层包裹。
+Go 在 1.13 版本中带来了 error wrapping，简单的说就是在错误传递的过程中，新生成的错误中可以包含完整的其他错误，就像洋葱一样的层层包裹。
+
 ![](./../images/error_wrapping.png)
 
  `fmt.Errorf` 新的 `%w` 生成包裹的错误:
@@ -58,17 +60,17 @@ newErr := fmt.Errorf("access error: %w", permissionErr)
 permissionErr := errors.Unwrap(newErr)
 ```
 
-`errors.Is` 代替 `==` 判断错误，会层层剥开去判断错误是否相等
+`errors.Is` 代替 `==` 判断错误，会调用 `errors.Unwrap` 判断错误链上任意一个错误是否与目标错误相等：
 ```go
-// 类似 if err == ErrNotFound {
+// 类似于 if err == ErrNotFound {
 if errors.Is(err, ErrNotFound) {
 	// 错误处理
 }
 ```
 
-`errors.As` 代替类型推断判断错误，会层层剥开去判断类型是否相同，如果相同，将 err 赋值给目标类型
+`errors.As` 代替类型推断判断错误，会调用 `errors.Unwrap` 判断错误链上任意一个错误是否与目标错误类型相同，如果相同，将错误赋值给目标类型：
 ```go
-// if e, ok := err.(*NotFoundError); ok {
+// 类似于 if e, ok := err.(*NotFoundError); ok {
 var e *NotFoundError
 if errors.As(err, &e) {
 	// 错误处理
@@ -97,17 +99,17 @@ if errors.Is(err, &Error{User: "someuser"}) {
     // err's User field is "someuser".
 }
 ```
-`errors.As` 方法也是同样可以用 `As` 方法来扩展。
+这样错误判断也有更强的自定义行为。`errors.As` 方法也是同样可以用 `As` 方法来扩展。
 
 
 ## 源码解析
-基于 go version go1.13.1 darwin/amd64 的源代码解析
+以下是基于 go version go1.13.1 darwin/amd64 的源代码解析
 
 ```go
 func Unwrap(err error) error {
 	u, ok := err.(interface {
 		Unwrap() error
-	}) // duck type 判断错误有没有实现 Unwrap 方法
+	}) // 判断错误有没有实现 Unwrap 方法
 	if !ok {
 		return nil // 没有实现返回 nil
 	}
