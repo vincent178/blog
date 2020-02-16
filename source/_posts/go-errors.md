@@ -172,4 +172,4 @@ func As(err error, target interface{}) bool {
 3. https://github.com/golang/go/wiki/ErrorValueFAQ
 4. https://golang.org/doc/go1.13
 
-![](../images/wechat.png)
+![](../images/wechat.bmp)
