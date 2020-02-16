@@ -171,3 +171,5 @@ func As(err error, target interface{}) bool {
 2. https://golang.org/ref/spec#Assignability
 3. https://github.com/golang/go/wiki/ErrorValueFAQ
 4. https://golang.org/doc/go1.13
+
+![](../images/wechat.png)
