@@ -11,3 +11,8 @@ Master
 * Controllers
 
 只有 API Server 才和 etcd 通信
+
+
+
+apimachinery 是干嘛的？
+apiserver 
