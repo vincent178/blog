@@ -7,5 +7,3 @@ draft: true
 what is Listener?
 
 
-
-
