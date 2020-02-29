@@ -143,7 +143,7 @@ func main() {
 ```
 
 cmd/kubelet/app/server.go
-```
+```go
 func NewKubeletCommand() *cobra.Command {
 	cleanFlagSet := pflag.NewFlagSet(componentKubelet, pflag.ContinueOnError)
 	cleanFlagSet.SetNormalizeFunc(cliflag.WordSepNormalizeFunc)
@@ -214,8 +214,14 @@ func NewScheme() *Scheme {
 	s.converter = conversion.NewConverter(s.nameFunc) // nameFunc 通过 type 返回kind
 
 	// Enable couple default conversions by default.
-	utilruntime.Must(RegisterEmbeddedConversions(s))
-	utilruntime.Must(RegisterStringConversions(s))
+	utilruntime.Must(RegisterEmbeddedConversions(s)) // 注册 Object 与 RawExtension 的转换
+
+	// 注册了以下类型变换 
+	// Convert_Slice_string_To_string
+	// Convert_Slice_string_To_int
+	// Convert_Slice_string_To_bool
+	// Convert_Slice_string_To_int64
+	utilruntime.Must(RegisterStringConversions(s)) 
 
 	utilruntime.Must(s.RegisterInputDefaults(&map[string][]string{}, JSONKeyMapper, conversion.AllowDifferentFieldTypeNames|conversion.IgnoreMissingFields))
 	utilruntime.Must(s.RegisterInputDefaults(&url.Values{}, JSONKeyMapper, conversion.AllowDifferentFieldTypeNames|conversion.IgnoreMissingFields))
