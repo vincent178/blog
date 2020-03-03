@@ -333,8 +333,172 @@ func NewSchemeBuilder(funcs ...func(*Scheme) error) SchemeBuilder {
 }
 ```
 
+staging/src/k8s.io/apimachinery/pkg/runtime/serializer/json/json.go
+implement `staging/src/k8s.io/apimachinery/pkg/runtime/interfaces.go` Decoder 接口
 
+```go
+func (s *Serializer) Decode(originalData []byte, gvk *schema.GroupVersionKind, into runtime.Object) (runtime.Object, *schema.GroupVersionKind, error) {
+	data := originalData
+	if s.options.Yaml {
+		altered, err := yaml.YAMLToJSON(data)
+		if err != nil {
+			return nil, nil, err
+		}
+		data = altered
+	}
 
+	actual, err := s.meta.Interpret(data)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if gvk != nil {
+		*actual = gvkWithDefaults(*actual, *gvk)
+	}
+
+	if unk, ok := into.(*runtime.Unknown); ok && unk != nil {
+		unk.Raw = originalData
+		unk.ContentType = runtime.ContentTypeJSON
+		unk.GetObjectKind().SetGroupVersionKind(*actual)
+		return unk, actual, nil
+	}
+
+	if into != nil {
+		_, isUnstructured := into.(runtime.Unstructured)
+		types, _, err := s.typer.ObjectKinds(into)
+		switch {
+		case runtime.IsNotRegisteredError(err), isUnstructured:
+			if err := caseSensitiveJsonIterator.Unmarshal(data, into); err != nil {
+				return nil, actual, err
+			}
+			return into, actual, nil
+		case err != nil:
+			return nil, actual, err
+		default:
+			*actual = gvkWithDefaults(*actual, types[0])
+		}
+	}
+
+	if len(actual.Kind) == 0 {
+		return nil, actual, runtime.NewMissingKindErr(string(originalData))
+	}
+	if len(actual.Version) == 0 {
+		return nil, actual, runtime.NewMissingVersionErr(string(originalData))
+	}
+
+	// use the target if necessary
+	obj, err := runtime.UseOrCreateObject(s.typer, s.creater, *actual, into)
+	if err != nil {
+		return nil, actual, err
+	}
+
+	if err := caseSensitiveJsonIterator.Unmarshal(data, obj); err != nil {
+		return nil, actual, err
+	}
+
+	// If the deserializer is non-strict, return successfully here.
+	if !s.options.Strict {
+		return obj, actual, nil
+	}
+
+	// In strict mode pass the data trough the YAMLToJSONStrict converter.
+	// This is done to catch duplicate fields regardless of encoding (JSON or YAML). For JSON data,
+	// the output would equal the input, unless there is a parsing error such as duplicate fields.
+	// As we know this was successful in the non-strict case, the only error that may be returned here
+	// is because of the newly-added strictness. hence we know we can return the typed strictDecoderError
+	// the actual error is that the object contains duplicate fields.
+	altered, err := yaml.YAMLToJSONStrict(originalData)
+	if err != nil {
+		return nil, actual, runtime.NewStrictDecodingError(err.Error(), string(originalData))
+	}
+	// As performance is not an issue for now for the strict deserializer (one has regardless to do
+	// the unmarshal twice), we take the sanitized, altered data that is guaranteed to have no duplicated
+	// fields, and unmarshal this into a copy of the already-populated obj. Any error that occurs here is
+	// due to that a matching field doesn't exist in the object. hence we can return a typed strictDecoderError,
+	// the actual error is that the object contains unknown field.
+	strictObj := obj.DeepCopyObject()
+	if err := strictCaseSensitiveJsonIterator.Unmarshal(altered, strictObj); err != nil {
+		return nil, actual, runtime.NewStrictDecodingError(err.Error(), string(originalData))
+	}
+	// Always return the same object as the non-strict serializer to avoid any deviations.
+	return obj, actual, nil
+}
+```
+
+staging/src/k8s.io/apimachinery/pkg/runtime/serializer/codec_factory.go
+```go
+func NewCodecFactory(scheme *runtime.Scheme, mutators ...CodecFactoryOptionsMutator) CodecFactory {
+	options := CodecFactoryOptions{Pretty: true}
+	for _, fn := range mutators {
+		fn(&options)
+	}
+
+	serializers := newSerializersForScheme(scheme, json.DefaultMetaFactory, options) // 注册 json yaml proto raw 序列化
+	return newCodecFactory(scheme, serializers)
+}
+
+func newSerializersForScheme(scheme *runtime.Scheme, mf json.MetaFactory, options CodecFactoryOptions) []serializerType {
+	jsonSerializer := json.NewSerializerWithOptions(
+		mf, scheme, scheme,
+		json.SerializerOptions{Yaml: false, Pretty: false, Strict: options.Strict},
+	)
+	jsonSerializerType := serializerType{
+		AcceptContentTypes: []string{runtime.ContentTypeJSON},
+		ContentType:        runtime.ContentTypeJSON,
+		FileExtensions:     []string{"json"},
+		EncodesAsText:      true,
+		Serializer:         jsonSerializer,
+
+		Framer:           json.Framer,
+		StreamSerializer: jsonSerializer,
+	}
+	if options.Pretty {
+		jsonSerializerType.PrettySerializer = json.NewSerializerWithOptions(
+			mf, scheme, scheme,
+			json.SerializerOptions{Yaml: false, Pretty: true, Strict: options.Strict},
+		)
+	}
+
+	yamlSerializer := json.NewSerializerWithOptions(
+		mf, scheme, scheme,
+		json.SerializerOptions{Yaml: true, Pretty: false, Strict: options.Strict},
+	)
+	protoSerializer := protobuf.NewSerializer(scheme, scheme)
+	protoRawSerializer := protobuf.NewRawSerializer(scheme, scheme)
+
+	serializers := []serializerType{
+		jsonSerializerType,
+		{
+			AcceptContentTypes: []string{runtime.ContentTypeYAML},
+			ContentType:        runtime.ContentTypeYAML,
+			FileExtensions:     []string{"yaml"},
+			EncodesAsText:      true,
+			Serializer:         yamlSerializer,
+		},
+		{
+			AcceptContentTypes: []string{runtime.ContentTypeProtobuf},
+			ContentType:        runtime.ContentTypeProtobuf,
+			FileExtensions:     []string{"pb"},
+			Serializer:         protoSerializer,
+
+			Framer:           protobuf.LengthDelimitedFramer,
+			StreamSerializer: protoRawSerializer,
+		},
+	}
+
+	for _, fn := range serializerExtensions {
+		if serializer, ok := fn(scheme); ok {
+			serializers = append(serializers, serializer)
+		}
+	}
+	return serializers
+}
+```
+
+pkg/kubelet/kubeletconfig/util/codec/codec.go
+```go
+
+```
 
 
 
