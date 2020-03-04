@@ -81,6 +81,8 @@ https://en.wikipedia.org/wiki/Non-uniform_memory_access
 
 ### common pattern
 
+codec 是 encode 和 decode 的合成词 https://en.wikipedia.org/wiki/Codec
+
 ```go
 type SchemeBuilder []func(*Scheme) error
 
@@ -500,5 +502,248 @@ pkg/kubelet/kubeletconfig/util/codec/codec.go
 
 ```
 
+pkg/runtime/interfaces.go
+```go
+type GroupVersioner interface {
+	// KindForGroupVersionKinds returns a desired target group version kind for the given input, or returns ok false if no
+	// target is known. In general, if the return target is not in the input list, the caller is expected to invoke
+	// Scheme.New(target) and then perform a conversion between the current Go type and the destination Go type.
+	// Sophisticated implementations may use additional information about the input kinds to pick a destination kind.
+	KindForGroupVersionKinds(kinds []schema.GroupVersionKind) (target schema.GroupVersionKind, ok bool)
+	// Identifier returns string representation of the object.
+	// Identifiers of two different encoders should be equal only if for every input
+	// kinds they return the same result.
+	Identifier() string
+}
+```
 
+pkg/runtime/schema/group_version.go
+```go
+type GroupVersionKind struct {
+	Group   string
+	Version string
+	Kind    string
+}
 
+type GroupVersion struct {
+	Group   string
+	Version string
+}
+```
+
+pkg/runtime/types.go
+API Object 支持的格式
+```go
+const (
+	ContentTypeJSON     string = "application/json"
+	ContentTypeYAML     string = "application/yaml"
+	ContentTypeProtobuf string = "application/vnd.kubernetes.protobuf"
+)
+```
+
+staging/src/k8s.io/apimachinery/pkg/runtime/serializer/codec_factory.go
+```go
+// encoder decoder serializers
+type CodecFactory struct {
+	scheme      *runtime.Scheme
+	serializers []serializerType
+	universal   runtime.Decoder // 
+	accepts     []runtime.SerializerInfo
+
+	legacySerializer runtime.Serializer
+}
+
+func newCodecFactory(scheme *runtime.Scheme, serializers []serializerType) CodecFactory {
+	decoders := make([]runtime.Decoder, 0, len(serializers))
+	var accepts []runtime.SerializerInfo
+	alreadyAccepted := make(map[string]struct{})
+
+	var legacySerializer runtime.Serializer
+	for _, d := range serializers {
+		decoders = append(decoders, d.Serializer)
+		for _, mediaType := range d.AcceptContentTypes {
+			if _, ok := alreadyAccepted[mediaType]; ok {
+				continue
+			}
+			alreadyAccepted[mediaType] = struct{}{}
+			info := runtime.SerializerInfo{
+				MediaType:        d.ContentType,
+				EncodesAsText:    d.EncodesAsText,
+				Serializer:       d.Serializer,
+				PrettySerializer: d.PrettySerializer,
+			}
+
+			mediaType, _, err := mime.ParseMediaType(info.MediaType)
+			if err != nil {
+				panic(err)
+			}
+			parts := strings.SplitN(mediaType, "/", 2)
+			info.MediaTypeType = parts[0]
+			info.MediaTypeSubType = parts[1]
+
+			if d.StreamSerializer != nil {
+				info.StreamSerializer = &runtime.StreamSerializerInfo{
+					Serializer:    d.StreamSerializer,
+					EncodesAsText: d.EncodesAsText,
+					Framer:        d.Framer,
+				}
+			}
+			accepts = append(accepts, info)
+			if mediaType == runtime.ContentTypeJSON {
+				legacySerializer = d.Serializer
+			}
+		}
+	}
+	if legacySerializer == nil {
+		legacySerializer = serializers[0].Serializer
+	}
+
+	return CodecFactory{
+		scheme:      scheme,
+		serializers: serializers,
+		universal:   recognizer.NewDecoder(decoders...), // 返回 universal decoder，依次尝试 json yaml protobuf decoder decoder
+
+		accepts: accepts,
+
+		legacySerializer: legacySerializer,
+	}
+}
+```
+
+staging/src/k8s.io/apimachinery/pkg/runtime/serializer/recognizer/recognizer.go
+```go
+func (d *decoder) Decode(data []byte, gvk *schema.GroupVersionKind, into runtime.Object) (runtime.Object, *schema.GroupVersionKind, error) {
+	var (
+		lastErr error
+		skipped []runtime.Decoder
+	)
+
+	// try recognizers, record any decoders we need to give a chance later
+	for _, r := range d.decoders {
+		switch t := r.(type) {
+		case RecognizingDecoder:
+			buf := bytes.NewBuffer(data)
+			ok, unknown, err := t.RecognizesData(buf)
+			if err != nil {
+				lastErr = err
+				continue
+			}
+			if unknown {
+				skipped = append(skipped, t)
+				continue
+			}
+			if !ok {
+				continue
+			}
+			return r.Decode(data, gvk, into)
+		default:
+			skipped = append(skipped, t)
+		}
+	}
+
+	// try recognizers that returned unknown or didn't recognize their data
+	for _, r := range skipped {
+		out, actual, err := r.Decode(data, gvk, into)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		return out, actual, nil
+	}
+
+	if lastErr == nil {
+		lastErr = fmt.Errorf("no serialization format matched the provided data")
+	}
+	return nil, nil, lastErr
+}
+```
+
+staging/src/k8s.io/apimachinery/pkg/runtime/serializer/json/json.go
+```go
+func (s *Serializer) Decode(originalData []byte, gvk *schema.GroupVersionKind, into runtime.Object) (runtime.Object, *schema.GroupVersionKind, error) {
+	data := originalData
+	if s.options.Yaml {
+		altered, err := yaml.YAMLToJSON(data)
+		if err != nil {
+			return nil, nil, err
+		}
+		data = altered
+	}
+
+	actual, err := s.meta.Interpret(data) // staging/src/k8s.io/apimachinery/pkg/runtime/serializer/json/meta.go 解析 json 中 version 和 kind 信息， 返回 schema.GroupVersionKind
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if gvk != nil {
+		*actual = gvkWithDefaults(*actual, *gvk)
+	}
+
+	if unk, ok := into.(*runtime.Unknown); ok && unk != nil {
+		unk.Raw = originalData
+		unk.ContentType = runtime.ContentTypeJSON
+		unk.GetObjectKind().SetGroupVersionKind(*actual)
+		return unk, actual, nil
+	}
+
+	if into != nil {
+		_, isUnstructured := into.(runtime.Unstructured)
+		types, _, err := s.typer.ObjectKinds(into)
+		switch {
+		case runtime.IsNotRegisteredError(err), isUnstructured:
+			if err := caseSensitiveJsonIterator.Unmarshal(data, into); err != nil {
+				return nil, actual, err
+			}
+			return into, actual, nil
+		case err != nil:
+			return nil, actual, err
+		default:
+			*actual = gvkWithDefaults(*actual, types[0])
+		}
+	}
+
+	if len(actual.Kind) == 0 {
+		return nil, actual, runtime.NewMissingKindErr(string(originalData))
+	}
+	if len(actual.Version) == 0 {
+		return nil, actual, runtime.NewMissingVersionErr(string(originalData))
+	}
+
+	// use the target if necessary
+	obj, err := runtime.UseOrCreateObject(s.typer, s.creater, *actual, into)
+	if err != nil {
+		return nil, actual, err
+	}
+
+	if err := caseSensitiveJsonIterator.Unmarshal(data, obj); err != nil {
+		return nil, actual, err
+	}
+
+	// If the deserializer is non-strict, return successfully here.
+	if !s.options.Strict {
+		return obj, actual, nil
+	}
+
+	// In strict mode pass the data trough the YAMLToJSONStrict converter.
+	// This is done to catch duplicate fields regardless of encoding (JSON or YAML). For JSON data,
+	// the output would equal the input, unless there is a parsing error such as duplicate fields.
+	// As we know this was successful in the non-strict case, the only error that may be returned here
+	// is because of the newly-added strictness. hence we know we can return the typed strictDecoderError
+	// the actual error is that the object contains duplicate fields.
+	altered, err := yaml.YAMLToJSONStrict(originalData)
+	if err != nil {
+		return nil, actual, runtime.NewStrictDecodingError(err.Error(), string(originalData))
+	}
+	// As performance is not an issue for now for the strict deserializer (one has regardless to do
+	// the unmarshal twice), we take the sanitized, altered data that is guaranteed to have no duplicated
+	// fields, and unmarshal this into a copy of the already-populated obj. Any error that occurs here is
+	// due to that a matching field doesn't exist in the object. hence we can return a typed strictDecoderError,
+	// the actual error is that the object contains unknown field.
+	strictObj := obj.DeepCopyObject()
+	if err := strictCaseSensitiveJsonIterator.Unmarshal(altered, strictObj); err != nil {
+		return nil, actual, runtime.NewStrictDecodingError(err.Error(), string(originalData))
+	}
+	// Always return the same object as the non-strict serializer to avoid any deviations.
+	return obj, actual, nil
+}
+```
