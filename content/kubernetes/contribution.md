@@ -73,6 +73,13 @@ https://en.wikipedia.org/wiki/Hairpinning
 ### architecture
 https://en.wikipedia.org/wiki/Non-uniform_memory_access
 
+core 也叫 legacy 
+
+```yaml
+apiVersion: $GROUP_NAME/$VERSION
+kind: DeploymentList
+```
+
 ### questions?
 1. who control which Kind in config file?
 2. who will read the config file?
@@ -117,15 +124,6 @@ func NewSchemeBuilder(funcs ...func(*Scheme) error) SchemeBuilder {
 just add a little bit color to that*
 getting into the weeds*
 require a mount love*
-
-
-
-
-
-
-
-
-
 
 ### kubelet
 
@@ -440,10 +438,11 @@ func NewCodecFactory(scheme *runtime.Scheme, mutators ...CodecFactoryOptionsMuta
 }
 
 func newSerializersForScheme(scheme *runtime.Scheme, mf json.MetaFactory, options CodecFactoryOptions) []serializerType {
-	jsonSerializer := json.NewSerializerWithOptions(
+	jsonSerializer := json.NewSerializerWithOptions( // scheme 是 runtime.ObjectCreater 和 runtime.ObjectTyper
 		mf, scheme, scheme,
 		json.SerializerOptions{Yaml: false, Pretty: false, Strict: options.Strict},
-	)
+	) // 返回 json.Serializer
+
 	jsonSerializerType := serializerType{
 		AcceptContentTypes: []string{runtime.ContentTypeJSON},
 		ContentType:        runtime.ContentTypeJSON,
@@ -745,5 +744,20 @@ func (s *Serializer) Decode(originalData []byte, gvk *schema.GroupVersionKind, i
 	}
 	// Always return the same object as the non-strict serializer to avoid any deviations.
 	return obj, actual, nil
+}
+```
+
+staging/src/k8s.io/apimachinery/pkg/runtime/scheme.go
+```go
+func (s *Scheme) New(kind schema.GroupVersionKind) (Object, error) {
+	// 在已经注册的类型中
+	if t, exists := s.gvkToType[kind]; exists {
+		return reflect.New(t).Interface().(Object), nil
+	}
+
+	if t, exists := s.unversionedKinds[kind.Kind]; exists {
+		return reflect.New(t).Interface().(Object), nil
+	}
+	return nil, NewNotRegisteredErrForKind(s.schemeName, kind)
 }
 ```
