@@ -228,3 +228,55 @@ type rtype struct {
 ```
 
 反射接近于 runtime
+
+
+```go
+func stringArr() {
+	arr := [5]string{"H", "e", "l", "l", "o"}
+	p := unsafe.Pointer(&arr)
+	n := unsafe.Sizeof("")
+
+	println(*(*string)(unsafe.Pointer(uintptr(p) + n)))
+}
+
+func stringSlice() {
+	slice := []string{"H", "e", "l", "l", "o"}
+	p := unsafe.Pointer(&slice[0]) // 这边取第一个值，其实是为了拿到内部array的地址，参考 slice 的内存结构
+	n := unsafe.Sizeof("")
+
+	println(*(*string)(unsafe.Pointer(uintptr(p) + n)))
+}
+```
+
+runtime/slice.go
+```go
+// slice 内存结构
+type slice struct {
+	array unsafe.Pointer
+	len   int
+	cap   int
+}
+```
+
+runtime/string.go
+```go
+// string 内存结构
+type stringStruct struct {
+	str unsafe.Pointer
+	len int
+}
+```
+
+reflect/value.go
+```go
+type SliceHeader struct {
+	Data uintptr
+	Len  int
+	Cap  int
+}
+
+type StringHeader struct {
+	Data uintptr
+	Len  int
+}
+```
