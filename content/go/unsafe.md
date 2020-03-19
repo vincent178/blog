@@ -4,6 +4,15 @@ date: 2020-03-07T09:29:44+08:00
 draft: true
 ---
 
+Go 中的指针
+Go 指针的限制
+Go unsafe 指针
+Go unsafe 指针用法
+
+指针是用来存储内存地址的变量，这个地址的值指向存放在该地址的对象的值。
+
+Go 和 C 语言一样支持指针，虽然都是指针，但是在用法上差别很大。
+
 > Go 指针在绝大多数下是安全，剩下的那部分就在 `unsafe` 包里。
 
 
@@ -87,14 +96,5 @@ Reference:
 * https://golang.org/pkg/unsafe/
 * https://go101.org/article/unsafe.html
 * https://halfrost.com/go_slice/
-
-
-
-
-
-
-  def seller_timezone_name
-    @order.seller_timezone_name.presence || 'Pacific Time (US & Canada)' # Default to GOAT Time of timezone not set.
-  end
 
 

@@ -21,3 +21,12 @@ https://cloud.tencent.com/developer/news/303534
 
 TiFlash
 https://en.wikipedia.org/wiki/Log-structured_merge-tree
+
+
+
+qdisc: queueing disciplines
+tbf: token bucket filter
+
+
+apt-get install iproute2
+
