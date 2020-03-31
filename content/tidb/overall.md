@@ -30,3 +30,18 @@ tbf: token bucket filter
 
 apt-get install iproute2
 
+https://www.tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.qdisc.classless.html
+https://www.tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.qdisc.classful.html
+http://man7.org/linux/man-pages/man8/tc-tbf.8.html
+
+
+```c
+struct tc_tbf_qopt {
+	struct tc_ratespec rate;
+	struct tc_ratespec peakrate;
+	__u32		limit;
+	__u32		buffer;
+	__u32		mtu;
+};
+
+```
