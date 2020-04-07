@@ -2,8 +2,8 @@
 ====
 
 ## 2020
-* [Go error](./source/_posts/go-errors.md)
 * [Go assembly](./source/_posts/go-asm.md)
+* [Go error](./source/_posts/go-errors.md)
 * [深入浅出 PG 数据膨胀](./content/database/pg_bloat.md)
 
 ## 2018
