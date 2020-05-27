@@ -1,5 +1,8 @@
-Go Assembly
-===========
+---
+title: "浅谈 Go 语言的汇编"
+date: 2020-01-01T00:00:00+08:00
+draft: false
+---
 
 <small>命令默认跑在 MacBook Pro (15-inch, 2018)，Intel Core i7</small>
 <br>
@@ -8,7 +11,6 @@ Go Assembly
 因为我之前没有学过汇编，所以文中难免有错误或者疏漏的地方，如果你发现有疑问，尽情的提出来吧。
 
 > Assembler is how you talk to machine in the lowest level.
->
 >    -- Rob Pike
 
 当然，学习和理解 Go 的汇编并不是为了手撸汇编，而是给我们一种了解语言的工具。这是我身边同学的两个问题：
@@ -55,7 +57,7 @@ Intel X86 架构的栈是[头朝下的结构](https://eli.thegreenplace.net/2011
 这一部分是最让我困惑的，特别是看了[官方文档](https://golang.org/doc/asm)后，会更加无从下手。我觉得说的比较清楚的是[go-internals](https://github.com/teh-cmc/go-internals/tree/master/chapter1_assembly_primer)，
 
 * SB: 虚拟寄存器，可以视为内存，保存的是方法或者结构体等全局符号。[^1]: https://golang.org/doc/asm
-* BP 
+* BP
 * SP
 
 ## 举个例子
@@ -160,7 +162,7 @@ SP: Stack pointer: top of stack.
 TEXT 指令声明了 add 是 .text 段的一部分
 
 SB 是虚拟寄存器，存放的是 static base 静态基指针
- 
+
 $0 栈大小
 $16 参数大小 (caller)
 
@@ -226,19 +228,14 @@ func main() {
 关注这一行
 MOVLQSX 8(SP), AX 验证了前面的猜想
 
-
 再回到最开始的问题
 
 &Person{} 和 new(Person) 是一样的
 
+```
         0x001d 00029 (main.go:14)       MOVL    $0, ""..autotmp_3+12(SP)
         0x0025 00037 (main.go:14)       MOVL    $0, ""..autotmp_3+12(SP)
         0x002d 00045 (main.go:15)       MOVL    $0, ""..autotmp_4+8(SP)
-
-
-
-
-
 "".(*Person).name STEXT nosplit size=1 args=0x8 locals=0x0
         0x0000 00000 (main.go:7)        TEXT    "".(*Person).name(SB), NOSPLIT|ABIInternal, $0-8
         0x0000 00000 (main.go:7)        FUNCDATA        $0, gclocals·2a5305abe05176240e61b8620e19a815(SB)
@@ -278,14 +275,16 @@ MOVLQSX 8(SP), AX 验证了前面的猜想
         0x0039 00057 (main.go:24)       MOVQ    8(SP), BP
         0x003e 00062 (main.go:24)       ADDQ    $16, SP
         0x0042 00066 (main.go:24)       RET
+```
 
-
+```go
 //go:noinline
 func (p *Person) name(age int32) bool{
 	return p.age == age
 }
+```
 
-
+```
 "".(*Person).name STEXT nosplit size=17 args=0x18 locals=0x0
         0x0000 00000 (main.go:8)        TEXT    "".(*Person).name(SB), NOSPLIT|ABIInternal, $0-24
         0x0000 00000 (main.go:8)        FUNCDATA        $0, gclocals·1a65e721a2ccc325b382662e7ffee780(SB)
@@ -301,14 +300,10 @@ func (p *Person) name(age int32) bool{
         0x0009 00009 (main.go:9)        CMPL    (CX), AX
         0x000b 00011 (main.go:9)        SETEQ   "".~r1+24(SP)
         0x0010 00016 (main.go:9)        RET
-
+```
 
 * https://golang.org/doc/asm
 * https://eli.thegreenplace.net/2011/02/04/where-the-top-of-the-stack-is-on-x86/
 * https://eli.thegreenplace.net/2011/09/06/stack-frame-layout-on-x86-64
 * https://www.quora.com/What-is-a-quadword-in-64-bit-assembly-language#
 * http://www.mit.edu/afs.new/sipb/project/golang/doc/asm.html
-
-movq Source, Dest (copy source to destination)
-leaq Source, Dest (load source address to destination)
-q quad word (64 bits in x86-64 architecture)

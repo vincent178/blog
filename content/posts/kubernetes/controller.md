@@ -2,8 +2,7 @@
 title: "Controller"
 date: 2020-04-25T05:05:58+08:00
 draft: true
---
-
+---
 
 ```go
 // 默认的 clientset
@@ -48,6 +47,7 @@ controller.Run(2, stopCh);
 -> v1alpha1.Interface.Foos() FooInformer (实例是 v1alpha1.fooInformer)
 
 NewController 中声明了需要监听的事件
+
 ```go
 func NewController(
     kubeclientset kubernetes.Interface,

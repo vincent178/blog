@@ -1,7 +1,8 @@
 ---
-title: "Lock in Function"
+title: "高效用锁之巧用立即执行函数"
 date: 2020-04-26T05:26:13+08:00
-draft: true
+tags: ["go"]
+draft: false
 ---
 
 锁在 go 的代码中很常见。并发编程中锁保护对共享内存的读取和改动，不会出现竞争（race condition）。
