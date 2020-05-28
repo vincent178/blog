@@ -1,0 +1,16 @@
+name: Continues Integration
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - gh-pages # this branch is used for release
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: markdown lint
+      uses: nosborn/github-action-markdown-cli@v1.1.1
+
