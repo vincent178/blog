@@ -39,7 +39,7 @@ jobs:
           git config --local user.email "vh7157@gmail.com"
           git config --local user.name "vincent178"
           git add .
-          git commit -m "hugo generate" 
+          git commit -m "[bot] hugo $(date +"%Y-%m-%d")" 
     - name: push changes     
       uses: ad-m/github-push-action@master
       with:

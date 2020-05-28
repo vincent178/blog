@@ -33,27 +33,20 @@ defaultContentLanguage="zh"
   # it's set to `true` by default
   # oneHeadingSize = false
 
-[params.twitter]
-  # set Twitter handles for Twitter cards
-  # see https://developer.twitter.com/en/docs/tweets/optimize-with-cards/guides/getting-started#card-and-content-attribution
-  # do not include @
-  creator = "vincent_178"
-  site = ""
-
 [languages]
   [languages.zh]
     languageName = "Chinese"
-    title = "Terminal"
-    subtitle = "A simple, retro theme for Hugo"
-    owner = ""
-    keywords = ""
+    title = "Curiosity"
+    subtitle = "一个好奇的码农"
+    owner = "vincent178"
+    keywords = "golang kubernetes blog 博客"
     copyright = ""
     menuMore = "Show more"
     readMore = "Read more"
     readOtherPosts = "Read other posts"
 
     [languages.zh.params.logo]
-      logoText = "Terminal"
+      logoText = "好奇"
       logoHomeLink = "/"
 
     [languages.zh.menu]
@@ -62,6 +55,7 @@ defaultContentLanguage="zh"
         name = "About"
         url = "/about"
       [[languages.zh.menu.main]]
-        identifier = "archieve"
-        name = "Archieve"
-        url = "/archieve"
+        identifier = "archive"
+        name = "Archive"
+        url = "/archive"
+
