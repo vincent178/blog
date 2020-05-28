@@ -35,6 +35,7 @@ jobs:
       run: |
           set -euo pipefail
           cd public
+          echo "vincent178.site" > CNAME
           git config --local user.email "vh7157@gmail.com"
           git config --local user.name "vincent178"
           git add .
