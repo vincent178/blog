@@ -4,6 +4,8 @@ theme = "terminal"
 paginate = 5
 defaultContentLanguage="zh"
 
+googleAnalytics="UA-167990863-1"
+
 [markup.goldmark.renderer]
   unsafe= true
 
