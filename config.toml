@@ -38,17 +38,17 @@ googleAnalytics="UA-167990863-1"
 [languages]
   [languages.zh]
     languageName = "Chinese"
-    title = "Curiosity"
-    subtitle = "一个好奇的码农"
+    title = "Keep Curiosity"
+    subtitle = "保持好奇心"
     owner = "vincent178"
     keywords = "golang kubernetes blog 博客"
     copyright = ""
     menuMore = "Show more"
     readMore = "Read more"
-    readOtherPosts = "Read other posts"
+    readOtherPosts = "其他博客"
 
     [languages.zh.params.logo]
-      logoText = "好奇"
+      logoText = "保持好奇心"
       logoHomeLink = "/"
 
     [languages.zh.menu]
