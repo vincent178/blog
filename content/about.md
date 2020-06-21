@@ -30,5 +30,5 @@ draft: false
 * https://github.com/pingcap/chaos-mesh [ 1.8k stars ]
 * https://github.com/pingcap/tidb-operator [ 613 stars ]
 * https://github.com/vektra/mockery [ 1.8k stars ]
-* https://github.com/fastify/fastify [ 14.7 stars ]
+* https://github.com/fastify/fastify [ 14.7k stars ]
 * https://github.com/TypedProject/tsed [ 1.1k stars ]
