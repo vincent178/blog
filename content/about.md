@@ -9,7 +9,7 @@ draft: false
 
 
 ## 开源项目
-* LOON (https://github.com/loon-project/loon) [100 Stars]
+* LOON (https://github.com/loon-project/loon) [ 131 Stars ]
 
   用 Typescript 实现的 web 框架
 
@@ -32,4 +32,3 @@ draft: false
 * https://github.com/vektra/mockery [ 1.8k stars ]
 * https://github.com/fastify/fastify [ 14.7 stars ]
 * https://github.com/TypedProject/tsed [ 1.1k stars ]
-
