@@ -8,8 +8,7 @@ draft: false
 
 给 [kubernetes](https://github.com/kubernetes/kubernetes) [chaos-mesh](https://github.com/chaos-mesh/chaos-mesh) [tidb-operator](https://github.com/pingcap/tidb-operator) 贡献了代码。
 
-持续维护 [fastify][https://github.com/fastify/fastify] 的翻译工作。
-
+持续维护 [fastify](https://github.com/fastify/fastify) 的翻译工作。
 
 参与编写 [《TiDB In Action》](https://book.tidb.io/) 其中两个小节。
 
